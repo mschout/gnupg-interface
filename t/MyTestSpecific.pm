@@ -22,6 +22,7 @@ use IO::Seekable;
 use File::Compare;
 use Exporter;
 use Class::Struct;
+use File::Temp qw (tempdir);
 
 use GnuPG::Interface;
 use GnuPG::Handles;
@@ -29,21 +30,39 @@ use GnuPG::Handles;
 use vars qw( @ISA           @EXPORT
              $stdin         $stdout           $stderr
              $gpg_program   $handles          $gnupg
-             %texts
+             %texts         $gpg_is_modern
            );
 
 @ISA    = qw( Exporter );
 @EXPORT = qw( stdin                  stdout          stderr
               gnupg_program handles  reset_handles
-              texts                  file_match
+              texts                  file_match      gpg_is_modern
             );
 
 $gnupg = GnuPG::Interface->new( passphrase => 'test' );
 
-$gnupg->options->hash_init( homedir              => 'test',
+
+my $homedir;
+if (-f "test/gnupghome") {
+  my $record = IO::File->new( "< test/gnupghome" );
+  $homedir = <$record>;
+  $record->close();
+} else {
+  $homedir = tempdir( DIR => '/tmp');
+  my $record = IO::File->new( "> test/gnupghome" );
+  $record->write($homedir);
+  $record->close();
+}
+
+my @version = split('\.', $gnupg->version());
+$gpg_is_modern = ($version[0] > 2 || ($version[0] == 2 && $version[1] >= 1));
+
+
+
+$gnupg->options->hash_init( homedir              => $homedir,
                             armor                => 1,
                             meta_interactive     => 0,
-                            meta_signing_key_id  => '0xF950DA9C',
+                            meta_signing_key_id  => '0x93AFC4B1B0288A104996B44253AE596EF950DA9C',
                             always_trust         => 1,
                           );
 
@@ -52,8 +71,14 @@ struct( Text => { fn => "\$", fh => "\$", data => "\$" } );
 $texts{plain} = Text->new();
 $texts{plain}->fn( 'test/plain.1.txt' );
 
+$texts{alt_plain} = Text->new();
+$texts{alt_plain}->fn( 'test/plain.2.txt' );
+
 $texts{encrypted} = Text->new();
 $texts{encrypted}->fn( 'test/encrypted.1.gpg' );
+
+$texts{alt_encrypted} = Text->new();
+$texts{alt_encrypted}->fn( 'test/encrypted.2.gpg' );
 
 $texts{signed} = Text->new();
 $texts{signed}->fn( 'test/signed.1.asc' );
@@ -65,7 +90,7 @@ $texts{temp} = Text->new();
 $texts{temp}->fn( 'test/temp' );
 
 
-foreach my $name ( qw( plain encrypted signed key ) )
+foreach my $name ( qw( plain alt_plain encrypted alt_encrypted signed key ) )
 {
     my $entry = $texts{$name};
     my $filename = $entry->fn();
@@ -87,7 +112,7 @@ sub reset_handles
         stderr  => $stderr
       );
 
-    foreach my $name ( qw( plain encrypted signed key ) )
+    foreach my $name ( qw( plain alt_plain encrypted alt_encrypted signed key ) )
     {
         my $entry = $texts{$name};
         my $filename = $entry->fn();

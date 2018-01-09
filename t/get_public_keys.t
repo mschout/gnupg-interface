@@ -19,7 +19,7 @@ TEST
 {
     reset_handles();
 
-    my @returned_keys = $gnupg->get_public_keys_with_sigs( '0xF950DA9C' );
+    my @returned_keys = $gnupg->get_public_keys_with_sigs( '0x93AFC4B1B0288A104996B44253AE596EF950DA9C' );
 
     return 0 unless @returned_keys == 1;
 
@@ -83,7 +83,17 @@ TEST
                             date_string => '2000-02-06',
                             hex_id => '53AE596EF950DA9C',
                             sig_class => 0x13,
-                            validity => '!'));
+                            validity => '!'),
+      GnuPG::Signature->new(
+                            date => 1177086329,
+                            algo_num => 17,
+                            is_exportable => 1,
+                            user_id_string => 'GnuPG test key (for testing purposes only)',
+                            date_string => '2007-04-20',
+                            hex_id => '53AE596EF950DA9C',
+                            sig_class => 0x13,
+                            validity => '!'),
+                          );
 
     my $uid1 = GnuPG::UserId->new( as_string =>  'Foo Bar (1)',
                                    validity => '-');
@@ -175,7 +185,7 @@ TEST
     ];
 
     my $subkey = GnuPG::SubKey->new
-      ( validity                 => 'u',
+      ( validity                 => '-',
         length                   => 768,
         algo_num                 => 16,
         hex_id                   => 'ADB99D9C2E854A6B',

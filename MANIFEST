@@ -28,6 +28,7 @@ MANIFEST.SKIP
 META.yml
 README
 SIGNATURE
+t/000_setup.t
 t/clearsign.t
 t/decrypt.t
 t/detach_sign.t
@@ -49,12 +50,16 @@ t/sign.t
 t/sign_and_encrypt.t
 t/UserId.t
 t/verify.t
+t/version.t
 t/wrap_call.t
+t/zzz_cleanup.t
 test/encrypted.1.gpg
+test/encrypted.2.gpg
 test/key.1.asc
 test/options
 test/passphrase
 test/plain.1.txt
+test/plain.2.txt
 test/public-keys-sigs/1.0.test
 test/public-keys-sigs/1.1.test
 test/public-keys-sigs/2.0.test
@@ -66,5 +71,10 @@ test/public-keys/2.1.test
 test/pubring.gpg
 test/secret-keys/1.0.test
 test/secret-keys/2.0.test
+test/secret-keys/1.modern.test
 test/secring.gpg
 test/signed.1.asc
+test/public_keys.pgp
+test/secret_keys.pgp
+test/new_secret.pgp
+test/fake-pinentry.pl
